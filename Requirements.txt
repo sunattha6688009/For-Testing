@@ -1,0 +1,90 @@
+
+Car Rental Requirements for Travel NaJa
+
+1) Actors
+- Guest (visitor)
+- Member (registered user)
+- Back-end Staff (reporting/admin)
+- Car Rental Agency (external API)
+- Payment Gateway (bank credit-card API)
+
+2) Functional Requirements (high-level, implementable) — with Subjects
+- FR-CR-01: Browse available cars by destination, pickup/dropoff location, and dates.
+  - Subjects: Guest, Member, Car Rental Agency (data provider)
+  - Acceptance: system lists car types, rates, availability returned from agency API.
+
+- FR-CR-02: Advanced unified search across flights/cars/hotels filtered by destination and schedule.
+  - Subjects: Guest, Member, System (search service)
+  - Acceptance: a car-search endpoint returns matches and ranking used for UI.
+
+- FR-CR-03: Personalization / Recommendation for car type based on profile (travelers count, preferences).
+  - Subjects: Member, System (recommendation engine)
+  - Acceptance: recommendation engine suggests SUV/sedan based on stored profile and party size.
+
+- FR-CR-04: Register / Sign Up / Manage Profile including payment details (credit card stored securely).
+  - Subjects: Guest (registering), Member (managing profile), System (auth/profile service)
+  - Acceptance: user can register, add payment method, and update preferences.
+
+- FR-CR-05: Reserve car (create reservation) with required details: car type, agency id, pickup/dropoff, dates, renter info.
+  - Subjects: Member, Car Rental Agency
+  - Acceptance: reservation request sent to agency API; local reservation state created.
+
+- FR-CR-06: Process payment via bank credit-card gateway (credit card only).
+  - Subjects: Member (payer), Payment Gateway (Bank), System (payment orchestration)
+  - Acceptance: reservation triggers payment request; payment success/failure handled and persisted.
+
+- FR-CR-07: Confirm reservation with Car Rental Agency (receive confirmation id/status).
+  - Subjects: Car Rental Agency, System, Member (recipient of confirmation)
+  - Acceptance: on agency confirmation, update reservation status and notify user.
+
+- FR-CR-08: View reservations (list, details) and cancel reservation.
+  - Subjects: Member, Car Rental Agency (for cancel API), System
+  - Acceptance: member can retrieve own reservations; cancellation triggers agency API and refund/payment workflow.
+
+- FR-CR-09: Fetch realtime availability and pricing from Car Rental Agency API.
+  - Subjects: System (integration layer), Car Rental Agency, Guest/Member (consumers)
+  - Acceptance: UI shows up-to-date availability; caching TTL documented.
+
+- FR-CR-10: Error handling and reconciliation for failed agency calls or partial payment/booking.
+  - Subjects: Back-end Staff (admin/reconciliation), System (retry/monitoring)
+  - Acceptance: retries, dead-letter logs, and admin-visible reconciliation reports exist.
+
+3) Back-end / Admin Requirements — with Subjects
+- AR-CR-01: Generate car-rental reports (bookings per period, popular locations, cancellation rates).
+  - Subjects: Back-end Staff, System (reporting service)
+- AR-CR-02: Admin ability to view and resolve failed transactions and agency mismatches.
+  - Subjects: Back-end Staff, System
+
+4) Integration Requirements — with Subjects
+- INT-CR-01: Integrate with Car Rental Agency API for availability, booking, confirmation, cancellation.
+  - Subjects: System (integration/service layer), Car Rental Agency
+  - API: endpoints for search, availability, create booking, cancel booking, booking status.
+- INT-CR-02: Integrate with Payment Gateway (bank) for credit-card processing.
+  - Subjects: System (payment service), Payment Gateway (bank), Member (payer)
+  - Use secure tokenization or PCI-compliant flow; do not store raw card numbers.
+
+5) Non-functional Requirements — with Subjects
+- NFR-CR-01: Security — encrypt all API communication (TLS) and follow best practices for sensitive data.
+  - Subjects: System architects, DevOps, Developers
+- NFR-CR-02: Scalability — design to handle high load (target thousands transactions/sec); use async calls to agencies and rate-limiting.
+  - Subjects: System architects, DevOps
+- NFR-CR-03: Availability — degrade gracefully when external agency is unavailable (show cached results or alternatives).
+  - Subjects: System (integration/cache layer), Back-end Staff
+- NFR-CR-04: Performance — search responses should meet defined SLAs (document as needed).
+  - Subjects: System architects, Developers
+- NFR-CR-05: Audit & Logging — log booking/payment events for audits and troubleshooting.
+  - Subjects: System (logging), Back-end Staff, Security team
+
+6) Implementation Notes (make use-case creation easy)
+- Map each FR to a use case: e.g., "Reserve Car" -> actors: Member, Car Rental Agency, Payment Gateway; flow: Search -> Select -> Reserve -> Pay -> Confirm.
+- Define scenario steps per use case: main flow, alternate flows (payment failure, agency rejection), and postconditions.
+- Keep use-case names short and consistent: "Browse Cars", "Advanced Search Cars", "Reserve Car", "Make Payment", "View Reservation", "Cancel Reservation".
+- Provide example API contracts for each integration point (search request/response, booking request/response, payment request/response).
+- Include acceptance criteria with each use case to make stories/test-cases straightforward.
+
+7) Constraints & Assumptions
+- The platform does not own car inventory; all availability and confirmation come from external agencies.
+- Payment method: credit card only initially.
+- Local guide management is internal and unrelated to car agency flows (no agency integration for guides).
+
+End of Car Rental Requirements
