@@ -1,0 +1,39 @@
+%%{init: {"theme":"base"}}%%
+usecaseDiagram
+
+  actor "Guest (Visitor)" as G
+  actor "Member" as M
+  actor "Back-end Staff" as S
+  actor "Car Rental Agency (API)" as A
+  actor "Payment Gateway (Bank)" as B
+
+  G --> (View Promotions)
+  G --> (Browse Cars)
+  G --> (Advanced Search Cars)
+  G --> (Register / Sign Up)
+
+  M --> (Manage Profile)
+  M --> (Browse Cars)
+  M --> (Advanced Search Cars)
+  M --> (Get Recommendations)
+  M --> (View Car Details)
+  M --> (Reserve Car)
+  M --> (View Reservation)
+  M --> (Cancel Reservation)
+  M --> (Make Payment)
+  M --> (Receive Reservation Confirmation)
+
+  (Reserve Car) ..> (Make Payment) : <<include>>
+  (Advanced Search Cars) ..> (Get Recommendations) : <<include>>
+  (Browse Cars) ..> (Fetch Car Availability) : <<include>>
+
+  M --> (Fetch Car Availability)
+  A --> (Fetch Car Availability)
+
+  (Reserve Car) --> (Confirm Reservation)
+  A --> (Confirm Reservation)
+
+  (Make Payment) --> (Process Credit Card Payment)
+  B --> (Process Credit Card Payment)
+
+  S --> (Generate Car Rental Reports)
